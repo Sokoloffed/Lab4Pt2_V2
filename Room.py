@@ -1,24 +1,13 @@
 class Room:
     rooms = []
 
-    def __init__(self, number, size, is_lab=False):
-        self.number = number
+    def __init__(self, name, size, is_prac=False):
+        self.name = name
         self.size = size
-        self.is_lab = is_lab
+        self.is_prac = is_prac
 
     def __str__(self):
-        return "Room: " + str(self.number) + " (size: " + str(self.size) + ")"
+        return "Room: " + str(self.name) + " (size: " + str(self.size) + ")"
 
     def __repr__(self):
-        return "Room: " + str(self.number) + " (size: " + str(self.size) + ")"
-
-    @staticmethod
-    def get_id(number):
-        for i in range(len(Room.rooms)):
-            if Room.rooms[i].number == number:
-                return i
-        return -1
-
-    @staticmethod
-    def add(number, size, is_lab=False):
-        Room.rooms.append(Room(number, size, is_lab))
+        return "Room: " + str(self.name) + " (size: " + str(self.size) + ")"

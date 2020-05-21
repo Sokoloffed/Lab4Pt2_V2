@@ -17,7 +17,3 @@ class Group:
             if Group.groups[i].name == name:
                 return i
         return -1
-
-    @staticmethod
-    def add(name, size):
-        Group.groups.append(Group(name, size))

@@ -9,14 +9,3 @@ class Professor:
 
     def __repr__(self):
         return "Professor: " + self.name
-
-    @staticmethod
-    def get_id(name):
-        for i in range(len(Professor.professors)):
-            if Professor.professors[i].name == name:
-                return i
-        return -1
-
-    @staticmethod
-    def add(name):
-        Professor.professors.append(Professor(name))
