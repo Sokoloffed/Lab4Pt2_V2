@@ -106,13 +106,11 @@ Course.courses = [Course(name, groups, lect, prac) for name, groups, lect, prac 
 Timeslot.timeslots = [Timeslot(time[0], time[1], day) for time, day in list(itertools.product(timeslots, days))]
 
 
-# generation of random population
 def random_schedule():
     # {(timeslot, group): Course}
     schedule = {(timeslot, group.name): None for timeslot in Timeslot.timeslots for group in Group.groups}
 
-    # for each course generating a class - lecture or practical lesson if either of it is provided
-    # by the course structure
+   
     for course in Course.courses:
         if course.lecturer is not None:
             for group in course.groups:
@@ -142,15 +140,10 @@ def generate_schedules(n):
     return [random_schedule() for i in range(n)]
 
 
-# ***PENALTY CALCULATING***
 def room_overlap_penalty(schedule):
     penalty = 0
     for room in Room.rooms:
         for timeslot in Timeslot.timeslots:
-            # temp = 1 if there is no overlaps, therefore penalty = 0 in this case;
-            # if there are overlaps temp increments for each overlap, then penalty = temp
-            # e.g value (count for most erros) of overlaps
-            # same in other penalty counting functions
             temp = sum(
                 1 if schedule[(timeslot, group.name)] is not None and schedule[(timeslot, group.name)]['room'] == room
                 else 0 for group in Group.groups)
@@ -195,11 +188,8 @@ def room_size_and_type_penalty(schedule):
         penalty += 1 if value is not None and Group.groups[Group.get_id(group)].size > value['room'].size else 0
         penalty += 1 if value is not None and value['is_prac'] == value['room'].is_prac else 0
     return penalty
-# ***END OF PENALTY CALCULATING***
 
 
-# ***FITNESS FUNCTION***
-# 1 if all penalties are zero e.g perfect solution
 def schedule_fitness(schedule):
 
     return 1 / (1 + course_overlap_penalty(schedule) + professor_overlap_penalty(schedule)
@@ -207,7 +197,6 @@ def schedule_fitness(schedule):
                 + null_schedule_key_penalty(schedule))
 
 
-# random mutations e.g crossbreeding between two individuals
 def mutate(schedule_1, schedule_2):
     s1, s2 = schedule_1.copy(), schedule_2.copy()
     for key, _ in s1.items():
@@ -264,15 +253,7 @@ def filterDuplicates(key, value, masterKey, masterValue):
         return False
 
 def hasDuplicates(schedule, groups):
-    # copiedSchedule = dict(schedule)
-    # keys = copiedSchedule.keys()
-    # firstKey = list(keys)[0]
-    # firstVal = copiedSchedule[firstKey]
-    # similarDict = dict.fromkeys(keys, firstVal)
-    # schedule = dict(similarDict)
     for group in groups.items():
-        # other_groups = dict(by_group)
-        # del other_groups[group]
         for timeslot in Timeslot.timeslots:
             sameTimeslotsOtherGroups = {k: v for k, v in schedule.items() if filterTimeslots(k, timeslot, group)}
             thisGroupTimeslotClass = {k: v for k, v in schedule.items() if filterGroupTimeslotClass(k, timeslot, group)}
@@ -329,7 +310,6 @@ def print_schedule(schedule):
 
 
 def genetic_algorithm(times):
-    # generate initial population, descending sort by fitness
     population = generate_schedules(POPULATION)
     population = list(sorted(population, key=lambda x: schedule_fitness(x), reverse=True))
 
@@ -339,36 +319,28 @@ def genetic_algorithm(times):
     }
 
     i = 0
-    # fixed number of iterations
-    # iterating while fitness is not 1 can take unreasonable amount of
     while i < times:
         i += 1
-        # searching for individual with fitness = 1
         for individual in population:
             if schedule_fitness(individual) == 1:
-                # if so it is ideal schedule
                 return individual
-            # found new best fitness and therefor
             if schedule_fitness(individual) > best_individual['fitness']:
                 best_individual['individual'] = individual
                 best_individual['fitness'] = schedule_fitness(individual)
-        # selecting best end ordinary individuals
         best_individuals = population[:BEST].copy()
         ordinary_individuals = population[BEST:POPULATION].copy()
 
-        # adding new mutated individuals
         population = best_individuals.copy()
         for best in best_individuals:
             for ordinary in ordinary_individuals:
                 population.extend(mutate(best, ordinary))
-        # adding some randomly mutated individuals
         for individual in random.sample(best_individuals + ordinary_individuals, MUTATION_LEVEL):
             population.extend(mutate_with_random(individual))
     return best_individual
 
 
 if __name__ == '__main__':
-        times = input("Enter name of iterations:\n")
+        times = input("Enter number of iterations:\n")
         individual = genetic_algorithm(int(times))
         printable = individual['individual']
         print_schedule(individual['individual'])
